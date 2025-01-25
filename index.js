@@ -310,7 +310,7 @@ app.get('/failure-reason', authenticateToken, (req, res) => {
 });
 
 // ================ 8. Start the Server ================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 3006;
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`[DB Monitor] Server running on port ${PORT}...`);
 });
