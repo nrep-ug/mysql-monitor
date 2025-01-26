@@ -133,13 +133,16 @@ function restartMySQL() {
  */
 function getFailureReason() {
   try {
+    console.log(`[DEBUG] Attempting to read: ${MYSQL_ERROR_LOG_PATH}`);
     const logContent = fs.readFileSync(MYSQL_ERROR_LOG_PATH, 'utf8');
+    console.log(`[DEBUG] Successfully read the log file.`);
     const lines = logContent.trim().split('\n');
     const lastLines = lines.slice(-10).join('\n');
     return lastLines;
   } catch (err) {
-    console.error('[DB Monitor] Unable to read MySQL error log:', err.message);
-    return 'Could not read MySQL error log. Check file permissions or path.';
+    console.error(`[DEBUG] Error reading MySQL error log: ${err.message}`);
+    console.error(`[DEBUG] Full error:`, err);
+    return `Could not read MySQL error log. Check file permissions or path: ${err.message}`;
   }
 }
 
@@ -259,6 +262,7 @@ app.post('/login', (req, res) => {
   }
 
   const users = readUsersFromFile();
+  console.log('Users: ',users)
   const user = users.find(u => u.email === email && u.password === password);
   if (!user) {
     return res.status(401).json({ error: 'Invalid email or password.' });
