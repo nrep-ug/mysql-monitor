@@ -259,6 +259,7 @@ app.post('/login', (req, res) => {
   }
 
   const users = readUsersFromFile();
+  console.log('Users: ',users)
   const user = users.find(u => u.email === email && u.password === password);
   if (!user) {
     return res.status(401).json({ error: 'Invalid email or password.' });
