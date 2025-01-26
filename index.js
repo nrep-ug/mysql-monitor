@@ -29,9 +29,6 @@ import jwt from 'jsonwebtoken'; // For JWT-based authentication
 
 dotenv.config();
 
-// Use CORS, allowing requests from all origins (or specify an origin)
-app.use(cors());
-
 // This is the equivalent of __filename
 const __filename = fileURLToPath(import.meta.url);
 // This is the equivalent of __dirname
@@ -40,6 +37,7 @@ const __dirname = path.dirname(__filename);
 // ================ 2. Express App Setup ================
 const app = express();
 app.use(express.json());
+app.use(cors()); // Use CORS, allowing requests from all origins (or specify an origin)
 
 // ================ 3. Configurations ================
 
