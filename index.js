@@ -17,6 +17,7 @@
 
 // ================ 1. Load Dependencies ================
 import express from 'express';
+import cors from 'cors';
 import nodemailer from 'nodemailer';
 import mysql from 'mysql2/promise';
 import { exec } from 'child_process';
@@ -24,10 +25,12 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import dotenv from 'dotenv';
-// For JWT-based authentication
-import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken'; // For JWT-based authentication
 
 dotenv.config();
+
+// Use CORS, allowing requests from all origins (or specify an origin)
+app.use(cors());
 
 // This is the equivalent of __filename
 const __filename = fileURLToPath(import.meta.url);
