@@ -85,6 +85,7 @@ async function isDatabaseUp() {
   try {
     connection = await mysql.createConnection(DB_CONFIG);
     await connection.query('SELECT 1');
+    console.log('[DB Monitor] DB connection successful.');
     return true;
   } catch (error) {
     console.error('[DB Monitor] Error connecting to DB:', error.message);
