@@ -70,6 +70,7 @@ let lastStatus = true;
 
 // Broadcast status to all connected clients
 function broadcastStatus(status) {
+  console.log('[DB Monitor] Broadcasting status:', status);	
   wss.clients.forEach((client) => {
     if (client.readyState === ws.WebSocket.OPEN) { // Use ws.WebSocket.OPEN instead of ws.OPEN
       client.send(JSON.stringify({ status }));
@@ -79,6 +80,7 @@ function broadcastStatus(status) {
 
 // Helper Functions (unchanged except for clarity)
 async function isDatabaseUp() {
+  console.log('[DB Monitor] Checking DB connection...');
   let connection;
   try {
     connection = await mysql.createConnection(DB_CONFIG);
@@ -95,8 +97,8 @@ async function isDatabaseUp() {
 async function sendEmailAlert(subject, message) {
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_USER || 'your_gmail@gmail.com',
-      to: process.env.ALERT_EMAIL || 'admin@example.com',
+      from: process.env.EMAIL_USER, // 'your_gmail@gmail.com'
+      to: process.env.ALERT_EMAIL, // 'admin@example.com'
       subject,
       text: message,
     });
