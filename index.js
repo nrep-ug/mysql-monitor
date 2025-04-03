@@ -7,7 +7,7 @@ import fs from "fs"
 import { fileURLToPath } from "url"
 import path from "path"
 import dotenv from "dotenv"
-import http from "http"
+import https from "https"
 import { WebSocketServer } from "ws"
 import jwt from "jsonwebtoken"
 
@@ -39,7 +39,11 @@ const CONFIG = {
 
 // Initialize Express and HTTP server
 const app = express()
-const server = http.createServer(app)
+const server = https.createServer({
+  key: fs.readFileSync("/etc/letsencrypt/live/nrepserver.derrickml.com/privkey.pem"),
+  cert: fs.readFileSync("/etc/letsencrypt/live/nrepserver.derrickml.com/fullchain.pem"),
+}, app)
+
 
 // Setup WebSocket server
 const wss = new WebSocketServer({ server })
