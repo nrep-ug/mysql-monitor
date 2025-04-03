@@ -57,12 +57,7 @@ app.use(express.static(path.join(__dirname, "public")))
 // State variables
 let lastStatus = true
 let statusHistory = readStatusHistoryFromFile()
-const serverMetrics = {
-  uptime: 0,
-  lastRestart: null,
-  failureCount: 0,
-  successCount: 0,
-}
+const serverMetrics = readServerMetricsFromFile()
 
 // Email configuration
 const transporter = nodemailer.createTransport({
@@ -141,6 +136,43 @@ function readStatusHistoryFromFile() {
   }
 }
 
+function readServerMetricsFromFile() {
+  try {
+    if (!fs.existsSync(CONFIG.SERVER_METRICS_FILE)) {
+      fs.writeFileSync(CONFIG.SERVER_METRICS_FILE, JSON.stringify({
+        uptime: 0,
+        lastRestart: null,
+        failureCount: 0,
+        successCount: 0,
+      }), "utf8")
+      return {
+        uptime: 0,
+        lastRestart: null,
+        failureCount: 0,
+        successCount: 0,
+      }
+    }
+    const data = fs.readFileSync(CONFIG.SERVER_METRICS_FILE, "utf8")
+    return JSON.parse(data)
+  } catch (error) {
+    console.error("[DB Monitor] Error reading server metrics file:", error)
+    return {
+      uptime: 0,
+      lastRestart: null,
+      failureCount: 0,
+      successCount: 0,
+    }
+  }
+}
+
+function writeServerMetricsToFile(metrics) {
+  try {
+    fs.writeFileSync(CONFIG.SERVER_METRICS_FILE, JSON.stringify(metrics, null, 2), "utf8")
+  } catch (error) {
+    console.error("[DB Monitor] Error writing server metrics file:", error)
+  }
+}
+
 function writeStatusHistoryToFile(history) {
   try {
     fs.writeFileSync(CONFIG.STATUS_HISTORY_FILE, JSON.stringify(history, null, 2), "utf8")
@@ -197,6 +229,7 @@ function restartMySQL() {
       }
       console.log("[DB Monitor] MySQL restart output:", stdout)
       serverMetrics.lastRestart = new Date().toISOString()
+      writeServerMetricsToFile(serverMetrics) // Save metrics to file
       resolve(stdout)
     })
   })
@@ -284,6 +317,9 @@ function broadcastStatus(status) {
   // Calculate uptime percentage
   const total = serverMetrics.successCount + serverMetrics.failureCount
   serverMetrics.uptime = total > 0 ? (serverMetrics.successCount / total) * 100 : 100
+
+  // Save metrics to file
+  writeServerMetricsToFile(serverMetrics)
 
   // Broadcast to all clients
   wss.clients.forEach((client) => {
