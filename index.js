@@ -33,6 +33,7 @@ const CONFIG = {
   MYSQL_RESTART_COMMAND: process.env.MYSQL_RESTART_COMMAND || "sudo service mysql restart",
   JWT_SECRET: process.env.JWT_SECRET || "SUPER_SECRET_KEY",
   USERS_FILE_PATH: path.resolve(__dirname, "users.json"),
+  STATUS_HISTORY_FILE: path.resolve(__dirname, "status-history.json"),
   PORT: process.env.PORT || 3006,
   JWT_EXPIRY: process.env.JWT_EXPIRY || "24h",
 }
@@ -55,7 +56,7 @@ app.use(express.static(path.join(__dirname, "public")))
 
 // State variables
 let lastStatus = true
-let statusHistory = []
+let statusHistory = readStatusHistoryFromFile()
 const serverMetrics = {
   uptime: 0,
   lastRestart: null,
@@ -126,6 +127,28 @@ wss.on("connection", (ws, req) => {
 })
 
 // Helper Functions
+function readStatusHistoryFromFile() {
+  try {
+    if (!fs.existsSync(CONFIG.STATUS_HISTORY_FILE)) {
+      fs.writeFileSync(CONFIG.STATUS_HISTORY_FILE, JSON.stringify([]), "utf8")
+      return []
+    }
+    const data = fs.readFileSync(CONFIG.STATUS_HISTORY_FILE, "utf8")
+    return JSON.parse(data)
+  } catch (error) {
+    console.error("[DB Monitor] Error reading status history file:", error)
+    return []
+  }
+}
+
+function writeStatusHistoryToFile(history) {
+  try {
+    fs.writeFileSync(CONFIG.STATUS_HISTORY_FILE, JSON.stringify(history, null, 2), "utf8")
+  } catch (error) {
+    console.error("[DB Monitor] Error writing status history file:", error)
+  }
+}
+
 async function isDatabaseUp() {
   console.log("[DB Monitor] Checking DB connection...")
   let connection
@@ -247,6 +270,9 @@ function broadcastStatus(status) {
   if (statusHistory.length > 1000) {
     statusHistory = statusHistory.slice(-1000)
   }
+
+  // Save history to file
+  writeStatusHistoryToFile(statusHistory)
 
   // Update metrics
   if (status === "UP") {
