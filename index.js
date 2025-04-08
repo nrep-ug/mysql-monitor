@@ -489,6 +489,11 @@ app.get("/api/system-info", authenticateToken, (req, res) => {
   }
 })
 
+// Serve the Next.js application for all unmatched routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"))
+})
+
 // Start Server
 server.listen(CONFIG.PORT, "0.0.0.0", () => {
   console.log(`[DB Monitor] Server running on port ${CONFIG.PORT}...`)
