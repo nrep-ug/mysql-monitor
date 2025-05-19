@@ -40,10 +40,10 @@ const CONFIG = {
 
 // Initialize Express and HTTP server
 const app = express()
-const server = https.createServer({
-  key: fs.readFileSync("/etc/letsencrypt/live/nrepserver.derrickml.com/privkey.pem"),
-  cert: fs.readFileSync("/etc/letsencrypt/live/nrepserver.derrickml.com/fullchain.pem"),
-}, app)
+// const server = https.createServer({
+//   key: fs.readFileSync("/etc/letsencrypt/live/nrepserver.derrickml.com/privkey.pem"),
+//   cert: fs.readFileSync("/etc/letsencrypt/live/nrepserver.derrickml.com/fullchain.pem"),
+// }, app)
 
 
 // Setup WebSocket server
@@ -495,7 +495,7 @@ app.get("*", (req, res) => {
 })
 
 // Start Server
-server.listen(CONFIG.PORT, "0.0.0.0", () => {
+app.listen(3006, () => {
   console.log(`[DB Monitor] Server running on port ${CONFIG.PORT}...`)
   console.log(`[DB Monitor] Monitoring MySQL at ${DB_CONFIG.host}:${DB_CONFIG.port}`)
 })
